@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Social Media MCP Gateway — Architecture</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #0f1117; color: #e0e0e0; padding: 40px; min-height: 100vh; }
+  h1 { text-align: center; font-size: 1.6rem; font-weight: 600; margin-bottom: 8px; color: #fff; }
+  .subtitle { text-align: center; font-size: 0.9rem; color: #888; margin-bottom: 40px; }
+
+  .diagram { max-width: 900px; margin: 0 auto; position: relative; }
+
+  /* Cursor IDE */
+  .cursor-box {
+    background: linear-gradient(135deg, #1a1a2e, #16213e);
+    border: 2px solid #4a6cf7;
+    border-radius: 12px;
+    padding: 16px 24px;
+    text-align: center;
+    max-width: 240px;
+    margin: 0 auto 20px;
+  }
+  .cursor-box .label { font-weight: 700; font-size: 1.1rem; color: #4a6cf7; }
+  .cursor-box .sub { font-size: 0.75rem; color: #888; margin-top: 4px; }
+
+  /* Arrow */
+  .arrow-down {
+    text-align: center;
+    font-size: 1.4rem;
+    color: #555;
+    margin: 8px 0;
+    line-height: 1;
+  }
+  .arrow-label {
+    text-align: center;
+    font-size: 0.7rem;
+    color: #666;
+    margin: 2px 0 8px;
+    font-family: 'SF Mono', 'Fira Code', monospace;
+  }
+
+  /* Gateway */
+  .gateway-box {
+    background: linear-gradient(135deg, #1a2a1a, #1e3a1e);
+    border: 2px solid #4caf50;
+    border-radius: 12px;
+    padding: 16px 24px;
+    text-align: center;
+    max-width: 340px;
+    margin: 0 auto 20px;
+  }
+  .gateway-box .label { font-weight: 700; font-size: 1.1rem; color: #4caf50; }
+  .gateway-box .sub { font-size: 0.75rem; color: #888; margin-top: 4px; }
+
+  /* Fan out lines */
+  .fan-container {
+    text-align: center;
+    margin: 8px 0 16px;
+    color: #555;
+    font-size: 0.8rem;
+  }
+
+  /* Server grid */
+  .server-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 16px;
+    margin-bottom: 32px;
+  }
+
+  .server-card {
+    border-radius: 10px;
+    padding: 14px 16px;
+    position: relative;
+  }
+  .server-card .name { font-weight: 700; font-size: 0.95rem; margin-bottom: 4px; }
+  .server-card .image-tag { font-family: 'SF Mono', 'Fira Code', monospace; font-size: 0.65rem; color: #999; margin-bottom: 8px; }
+  .server-card .desc { font-size: 0.75rem; color: #bbb; line-height: 1.4; margin-bottom: 8px; }
+  .server-card .secrets { font-size: 0.65rem; color: #888; font-family: 'SF Mono', 'Fira Code', monospace; line-height: 1.6; }
+  .server-card .secrets span { color: #aaa; }
+  .server-card .badge {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    font-size: 0.6rem;
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-weight: 600;
+  }
+
+  /* Colors per server */
+  .server-crosspost { background: linear-gradient(135deg, #2a1a2a, #3a1e3a); border: 1.5px solid #9c27b0; }
+  .server-crosspost .name { color: #ce93d8; }
+  .server-crosspost .badge { background: #9c27b0; color: #fff; }
+
+  .server-substack { background: linear-gradient(135deg, #2a2a1a, #3a3a1e); border: 1.5px solid #ff9800; }
+  .server-substack .name { color: #ffb74d; }
+  .server-substack .badge { background: #ff9800; color: #000; }
+
+  .server-medium { background: linear-gradient(135deg, #1a2a2a, #1e3a3a); border: 1.5px solid #00897b; }
+  .server-medium .name { color: #4db6ac; }
+  .server-medium .badge { background: #00897b; color: #fff; }
+
+  .server-reddit { background: linear-gradient(135deg, #2a1a1a, #3a1e1e); border: 1.5px solid #e64a19; }
+  .server-reddit .name { color: #ff8a65; }
+  .server-reddit .badge { background: #e64a19; color: #fff; }
+
+  .server-facebook { background: linear-gradient(135deg, #1a1a2e, #1e1e3e); border: 1.5px solid #1976d2; }
+  .server-facebook .name { color: #64b5f6; }
+  .server-facebook .badge { background: #1976d2; color: #fff; }
+
+  .server-twitter { background: linear-gradient(135deg, #1a2a2e, #1e2e3a); border: 1.5px solid #0097a7; }
+  .server-twitter .name { color: #4dd0e1; }
+  .server-twitter .badge { background: #0097a7; color: #fff; }
+
+  .server-bluesky { background: linear-gradient(135deg, #1a1a30, #1e2040); border: 1.5px solid #5c6bc0; }
+  .server-bluesky .name { color: #9fa8da; }
+  .server-bluesky .badge { background: #5c6bc0; color: #fff; }
+
+  /* Platform tags inside crosspost */
+  .platform-tags { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 6px; }
+  .platform-tags .tag {
+    font-size: 0.6rem;
+    padding: 2px 6px;
+    border-radius: 3px;
+    background: rgba(156, 39, 176, 0.2);
+    color: #ce93d8;
+    border: 1px solid rgba(156, 39, 176, 0.3);
+  }
+
+  /* Legend */
+  .legend {
+    max-width: 900px;
+    margin: 24px auto 0;
+    padding: 16px 20px;
+    background: #161822;
+    border-radius: 10px;
+    border: 1px solid #2a2d3a;
+  }
+  .legend h3 { font-size: 0.8rem; color: #888; margin-bottom: 10px; text-transform: uppercase; letter-spacing: 0.05em; }
+  .legend-items { display: flex; flex-wrap: wrap; gap: 16px; }
+  .legend-item { font-size: 0.75rem; color: #aaa; display: flex; align-items: center; gap: 6px; }
+  .legend-dot { width: 10px; height: 10px; border-radius: 50%; }
+  .dot-custom { background: #ff9800; }
+  .dot-community { background: #4caf50; }
+  .dot-active { background: #4a6cf7; }
+  .dot-inactive { background: #555; }
+
+  .overlap-note {
+    max-width: 900px;
+    margin: 16px auto 0;
+    padding: 12px 16px;
+    background: rgba(255, 152, 0, 0.08);
+    border: 1px solid rgba(255, 152, 0, 0.2);
+    border-radius: 8px;
+    font-size: 0.75rem;
+    color: #ccc;
+    line-height: 1.5;
+  }
+  .overlap-note strong { color: #ffb74d; }
+</style>
+</head>
+<body>
+
+<h1>Social Media MCP Gateway</h1>
+<p class="subtitle">7 isolated Docker containers behind one HTTP endpoint</p>
+
+<div class="diagram">
+
+  <!-- Cursor -->
+  <div class="cursor-box">
+    <div class="label">Cursor IDE</div>
+    <div class="sub">Your AI coding agent</div>
+  </div>
+
+  <div class="arrow-down">&#x2193;</div>
+  <div class="arrow-label">Streamable HTTP &#x2192; localhost:8811/sse</div>
+
+  <!-- Gateway -->
+  <div class="gateway-box">
+    <div class="label">Docker MCP Gateway</div>
+    <div class="sub">Aggregates all servers into one endpoint<br>Injects secrets as env vars per container</div>
+  </div>
+
+  <div class="fan-container">
+    &#x2193; &nbsp;&nbsp; &#x2193; &nbsp;&nbsp; &#x2193; &nbsp;&nbsp; &#x2193; &nbsp;&nbsp; &#x2193; &nbsp;&nbsp; &#x2193; &nbsp;&nbsp; &#x2193;
+    <br>
+    <span style="font-size:0.65rem; color:#666;">Each server = isolated Docker container with its own secrets</span>
+  </div>
+
+  <!-- Server cards -->
+  <div class="server-grid">
+
+    <!-- Crosspost -->
+    <div class="server-card server-crosspost">
+      <div class="badge">9 platforms</div>
+      <div class="name">crosspost</div>
+      <div class="image-tag">crosspost-mcp:latest</div>
+      <div class="desc">Multi-platform poster. One tool, posts everywhere at once.</div>
+      <div class="platform-tags">
+        <span class="tag">Twitter</span>
+        <span class="tag">Mastodon</span>
+        <span class="tag">Bluesky</span>
+        <span class="tag">LinkedIn</span>
+        <span class="tag">Discord</span>
+        <span class="tag">Dev.to</span>
+        <span class="tag">Telegram</span>
+        <span class="tag">Slack</span>
+        <span class="tag">Nostr</span>
+      </div>
+      <div class="secrets">
+        <span>crosspost.</span>twitter_api_consumer_key<br>
+        <span>crosspost.</span>mastodon_access_token<br>
+        <span style="color:#666;">... 18 more</span>
+      </div>
+    </div>
+
+    <!-- Substack -->
+    <div class="server-card server-substack">
+      <div class="badge">custom built</div>
+      <div class="name">substack</div>
+      <div class="image-tag">substack-enhanced-mcp:latest</div>
+      <div class="desc">Our custom server. 6 tools: create drafts, publish, list, get, delete.</div>
+      <div class="secrets">
+        <span>substack.</span>substack_publication_url<br>
+        <span>substack.</span>substack_session_token<br>
+        <span>substack.</span>substack_user_id
+      </div>
+    </div>
+
+    <!-- Medium -->
+    <div class="server-card server-medium">
+      <div class="badge">community</div>
+      <div class="name">medium</div>
+      <div class="image-tag">medium-mcp:latest</div>
+      <div class="desc">Publish posts to Medium. Legacy API &#x2014; no new tokens issued.</div>
+      <div class="secrets">
+        <span>medium.</span>medium_token
+      </div>
+    </div>
+
+    <!-- Reddit -->
+    <div class="server-card server-reddit">
+      <div class="badge">community</div>
+      <div class="name">reddit</div>
+      <div class="image-tag">reddit-mcp:latest</div>
+      <div class="desc">Post, reply, search, analytics on Reddit.</div>
+      <div class="secrets">
+        <span>reddit.</span>reddit_client_id<br>
+        <span>reddit.</span>reddit_client_secret<br>
+        <span style="color:#666;">... 3 more</span>
+      </div>
+    </div>
+
+    <!-- Facebook -->
+    <div class="server-card server-facebook">
+      <div class="badge">community</div>
+      <div class="name">facebook</div>
+      <div class="image-tag">facebook-mcp:latest</div>
+      <div class="desc">Facebook Pages: post, comments, insights.</div>
+      <div class="secrets">
+        <span>facebook.</span>facebook_access_token<br>
+        <span>facebook.</span>facebook_page_id
+      </div>
+    </div>
+
+    <!-- Twitter Enhanced -->
+    <div class="server-card server-twitter">
+      <div class="badge">community</div>
+      <div class="name">twitter-enhanced</div>
+      <div class="image-tag">twitter-enhanced-mcp:latest</div>
+      <div class="desc">19+ tools: search, followers, bookmarks, profiles, posting. Overlaps with crosspost for posting.</div>
+      <div class="secrets">
+        <span>twitter-enhanced.</span>twitter_api_key<br>
+        <span>twitter-enhanced.</span>twitter_bearer_token<br>
+        <span style="color:#666;">... 3 more</span>
+      </div>
+    </div>
+
+    <!-- Bluesky Enhanced -->
+    <div class="server-card server-bluesky">
+      <div class="badge">community</div>
+      <div class="name">bluesky-enhanced</div>
+      <div class="image-tag">bluesky-enhanced-mcp:latest</div>
+      <div class="desc">20+ tools: timeline, search, engagement, posting. Overlaps with crosspost for posting.</div>
+      <div class="secrets">
+        <span>bluesky-enhanced.</span>bluesky_identifier<br>
+        <span>bluesky-enhanced.</span>bluesky_app_password<br>
+        <span>bluesky-enhanced.</span>bluesky_service_url
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Overlap note -->
+  <div class="overlap-note">
+    <strong>Why both crosspost + twitter-enhanced / bluesky-enhanced?</strong><br>
+    Crosspost does basic posting to 9 platforms through one tool. The "enhanced" servers are separate community projects that add rich read/search/engagement tools for a single platform. You can use both &#x2014; crosspost for quick multi-platform blasts, enhanced servers for deeper interactions like searching tweets or browsing your Bluesky timeline.
+  </div>
+
+  <!-- Legend -->
+  <div class="legend">
+    <h3>Legend</h3>
+    <div class="legend-items">
+      <div class="legend-item"><div class="legend-dot dot-custom"></div> Custom built by us (substack)</div>
+      <div class="legend-item"><div class="legend-dot dot-community"></div> Community project, packaged as Docker</div>
+      <div class="legend-item"><div class="legend-dot dot-active"></div> Currently active (has credentials in .env)</div>
+      <div class="legend-item"><div class="legend-dot dot-inactive"></div> Inactive (no credentials yet)</div>
+    </div>
+  </div>
+
+</div>
+
+</body>
+</html>
