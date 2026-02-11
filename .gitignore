@@ -1,0 +1,20 @@
+# Credentials — NEVER commit
+social-media.env
+*.env
+!*.env.example
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Node
+node_modules/
+package-lock.json
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+
+# Docker build artifacts
+*.tar

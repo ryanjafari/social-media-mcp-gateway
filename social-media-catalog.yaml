@@ -1,0 +1,159 @@
+registry:
+
+  # =========================================================================
+  # CROSSPOST — Multi-platform posting (Twitter, Mastodon, Bluesky, LinkedIn,
+  #   Discord, Dev.to, Telegram, Slack, Nostr)
+  # =========================================================================
+  crosspost:
+    title: Crosspost
+    description: "Post to multiple social networks simultaneously via MCP"
+    type: server
+    image: crosspost-mcp:latest
+    source: https://github.com/humanwhocodes/crosspost
+    secrets:
+      - name: crosspost.twitter_api_consumer_key
+        env: TWITTER_API_CONSUMER_KEY
+      - name: crosspost.twitter_api_consumer_secret
+        env: TWITTER_API_CONSUMER_SECRET
+      - name: crosspost.twitter_access_token_key
+        env: TWITTER_ACCESS_TOKEN_KEY
+      - name: crosspost.twitter_access_token_secret
+        env: TWITTER_ACCESS_TOKEN_SECRET
+      - name: crosspost.mastodon_host
+        env: MASTODON_HOST
+      - name: crosspost.mastodon_access_token
+        env: MASTODON_ACCESS_TOKEN
+      - name: crosspost.bluesky_host
+        env: BLUESKY_HOST
+      - name: crosspost.bluesky_identifier
+        env: BLUESKY_IDENTIFIER
+      - name: crosspost.bluesky_password
+        env: BLUESKY_PASSWORD
+      - name: crosspost.linkedin_access_token
+        env: LINKEDIN_ACCESS_TOKEN
+      - name: crosspost.discord_bot_token
+        env: DISCORD_BOT_TOKEN
+      - name: crosspost.discord_channel_id
+        env: DISCORD_CHANNEL_ID
+      - name: crosspost.discord_webhook_url
+        env: DISCORD_WEBHOOK_URL
+      - name: crosspost.devto_api_key
+        env: DEVTO_API_KEY
+      - name: crosspost.telegram_bot_token
+        env: TELEGRAM_BOT_TOKEN
+      - name: crosspost.telegram_chat_id
+        env: TELEGRAM_CHAT_ID
+      - name: crosspost.slack_token
+        env: SLACK_TOKEN
+      - name: crosspost.slack_channel
+        env: SLACK_CHANNEL
+      - name: crosspost.nostr_private_key
+        env: NOSTR_PRIVATE_KEY
+      - name: crosspost.nostr_relays
+        env: NOSTR_RELAYS
+
+  # =========================================================================
+  # SUBSTACK ENHANCED — Draft creation, publishing, listing, management
+  # Uses unofficial API (session token auth)
+  # =========================================================================
+  substack-mcp:
+    title: Substack
+    description: "Create, publish, list, and manage Substack posts via MCP (6 tools: create_draft, publish, list_drafts, list_posts, get_post, delete_draft)"
+    type: server
+    image: substack-enhanced-mcp:latest
+    secrets:
+      - name: substack-mcp.substack_publication_url
+        env: SUBSTACK_PUBLICATION_URL
+      - name: substack-mcp.substack_session_token
+        env: SUBSTACK_SESSION_TOKEN
+      - name: substack-mcp.substack_user_id
+        env: SUBSTACK_USER_ID
+
+  # =========================================================================
+  # MEDIUM — Post publishing (legacy API, no new tokens issued)
+  # =========================================================================
+  medium-mcp:
+    title: Medium
+    description: "Publish posts to Medium via MCP (requires existing integration token)"
+    type: server
+    image: medium-mcp:latest
+    source: https://github.com/designly1/mcp-medium
+    secrets:
+      - name: medium-mcp.medium_token
+        env: MEDIUM_TOKEN
+
+  # =========================================================================
+  # REDDIT — Post, reply, search, analytics
+  # =========================================================================
+  reddit-mcp:
+    title: Reddit
+    description: "Create posts, reply to threads, search, and view analytics on Reddit via MCP"
+    type: server
+    image: reddit-mcp:latest
+    source: https://github.com/Arindam200/reddit-mcp
+    secrets:
+      - name: reddit-mcp.reddit_client_id
+        env: REDDIT_CLIENT_ID
+      - name: reddit-mcp.reddit_client_secret
+        env: REDDIT_CLIENT_SECRET
+      - name: reddit-mcp.reddit_username
+        env: REDDIT_USERNAME
+      - name: reddit-mcp.reddit_password
+        env: REDDIT_PASSWORD
+      - name: reddit-mcp.reddit_user_agent
+        env: REDDIT_USER_AGENT
+
+  # =========================================================================
+  # FACEBOOK — Page posting, comments, insights
+  # =========================================================================
+  facebook-mcp:
+    title: Facebook Pages
+    description: "Post to Facebook Pages, manage comments, and view insights via MCP"
+    type: server
+    image: facebook-mcp:latest
+    source: https://github.com/HagaiHen/facebook-mcp-server
+    secrets:
+      - name: facebook-mcp.facebook_access_token
+        env: FACEBOOK_ACCESS_TOKEN
+      - name: facebook-mcp.facebook_page_id
+        env: FACEBOOK_PAGE_ID
+
+  # =========================================================================
+  # TWITTER/X ENHANCED — 19+ tools (search, followers, bookmarks, etc.)
+  # Adds richer Twitter capabilities beyond crosspost's basic posting
+  # =========================================================================
+  twitter-enhanced:
+    title: "Twitter/X Enhanced"
+    description: "Advanced Twitter/X MCP server with 19+ tools: search, followers, bookmarks, profile lookup, posting"
+    type: server
+    image: twitter-enhanced-mcp:latest
+    source: https://github.com/rafaljanicki/x-twitter-mcp-server
+    secrets:
+      - name: twitter-enhanced.twitter_api_key
+        env: TWITTER_API_KEY
+      - name: twitter-enhanced.twitter_api_secret
+        env: TWITTER_API_SECRET
+      - name: twitter-enhanced.twitter_access_token
+        env: TWITTER_ACCESS_TOKEN
+      - name: twitter-enhanced.twitter_access_token_secret
+        env: TWITTER_ACCESS_TOKEN_SECRET
+      - name: twitter-enhanced.twitter_bearer_token
+        env: TWITTER_BEARER_TOKEN
+
+  # =========================================================================
+  # BLUESKY ENHANCED — 20+ tools (timeline, search, engagement, etc.)
+  # Adds richer Bluesky capabilities beyond crosspost's basic posting
+  # =========================================================================
+  bluesky-enhanced:
+    title: "Bluesky Enhanced"
+    description: "Advanced Bluesky MCP server with 20+ tools: timeline, search, engagement, post creation"
+    type: server
+    image: bluesky-enhanced-mcp:latest
+    source: https://github.com/brianellin/bsky-mcp-server
+    secrets:
+      - name: bluesky-enhanced.bluesky_identifier
+        env: BLUESKY_IDENTIFIER
+      - name: bluesky-enhanced.bluesky_app_password
+        env: BLUESKY_APP_PASSWORD
+      - name: bluesky-enhanced.bluesky_service_url
+        env: BLUESKY_SERVICE_URL
