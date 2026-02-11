@@ -236,24 +236,33 @@ echo ""
 # =========================================================================
 
 echo "=== Cleaning stale secrets ==="
-# Remove old unprefixed secrets from previous runs (e.g. bare substack_publication_url)
-ALL_KNOWN_VARS=(
-  "${CROSSPOST_VARS[@]}" "${SUBSTACK_VARS[@]}" "${MEDIUM_VARS[@]}"
-  "${REDDIT_VARS[@]}" "${FACEBOOK_VARS[@]}" "${TWITTER_ENH_VARS[@]}"
-  "${BLUESKY_ENH_VARS[@]}"
-)
-for var in "${ALL_KNOWN_VARS[@]}"; do
-  local_lower=$(echo "${var}" | tr '[:upper:]' '[:lower:]')
-  docker mcp secret rm "${local_lower}" 2>/dev/null || true
-done
-# Remove old "-mcp" prefixed secrets from previous naming convention
-OLD_PREFIXED_SERVERS=("substack-mcp" "medium-mcp" "reddit-mcp" "facebook-mcp")
-for old_srv in "${OLD_PREFIXED_SERVERS[@]}"; do
-  for var in "${ALL_KNOWN_VARS[@]}"; do
-    local_lower=$(echo "${var}" | tr '[:upper:]' '[:lower:]')
-    docker mcp secret rm "${old_srv}.${local_lower}" 2>/dev/null || true
+
+# Helper: remove a list of secrets by lowercasing var names with an optional prefix
+clean_secrets() {
+  local prefix="$1"  # empty string or "servername."
+  shift
+  local vars=("$@")
+  for var in "${vars[@]}"; do
+    local key="${prefix}$(echo "${var}" | tr '[:upper:]' '[:lower:]')"
+    docker mcp secret rm "${key}" 2>/dev/null || true
   done
-done
+}
+
+# Remove old unprefixed secrets (e.g. bare substack_publication_url)
+clean_secrets "" "${CROSSPOST_VARS[@]}"
+clean_secrets "" "${SUBSTACK_VARS[@]}"
+clean_secrets "" "${MEDIUM_VARS[@]}"
+clean_secrets "" "${REDDIT_VARS[@]}"
+clean_secrets "" "${FACEBOOK_VARS[@]}"
+clean_secrets "" "${TWITTER_ENH_VARS[@]}"
+clean_secrets "" "${BLUESKY_ENH_VARS[@]}"
+
+# Remove old "-mcp" prefixed secrets — only the vars that belonged to each server
+clean_secrets "substack-mcp." "${SUBSTACK_VARS[@]}"
+clean_secrets "medium-mcp."   "${MEDIUM_VARS[@]}"
+clean_secrets "reddit-mcp."   "${REDDIT_VARS[@]}"
+clean_secrets "facebook-mcp." "${FACEBOOK_VARS[@]}"
+
 echo "  ✓ done"
 echo ""
 
