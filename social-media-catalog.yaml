@@ -56,66 +56,66 @@ registry:
   # SUBSTACK ENHANCED — Draft creation, publishing, listing, management
   # Uses unofficial API (session token auth)
   # =========================================================================
-  substack-mcp:
+  substack:
     title: Substack
     description: "Create, publish, list, and manage Substack posts via MCP (6 tools: create_draft, publish, list_drafts, list_posts, get_post, delete_draft)"
     type: server
     image: substack-enhanced-mcp:latest
     secrets:
-      - name: substack-mcp.substack_publication_url
+      - name: substack.substack_publication_url
         env: SUBSTACK_PUBLICATION_URL
-      - name: substack-mcp.substack_session_token
+      - name: substack.substack_session_token
         env: SUBSTACK_SESSION_TOKEN
-      - name: substack-mcp.substack_user_id
+      - name: substack.substack_user_id
         env: SUBSTACK_USER_ID
 
   # =========================================================================
   # MEDIUM — Post publishing (legacy API, no new tokens issued)
   # =========================================================================
-  medium-mcp:
+  medium:
     title: Medium
     description: "Publish posts to Medium via MCP (requires existing integration token)"
     type: server
     image: medium-mcp:latest
     source: https://github.com/designly1/mcp-medium
     secrets:
-      - name: medium-mcp.medium_token
+      - name: medium.medium_token
         env: MEDIUM_TOKEN
 
   # =========================================================================
   # REDDIT — Post, reply, search, analytics
   # =========================================================================
-  reddit-mcp:
+  reddit:
     title: Reddit
     description: "Create posts, reply to threads, search, and view analytics on Reddit via MCP"
     type: server
     image: reddit-mcp:latest
     source: https://github.com/Arindam200/reddit-mcp
     secrets:
-      - name: reddit-mcp.reddit_client_id
+      - name: reddit.reddit_client_id
         env: REDDIT_CLIENT_ID
-      - name: reddit-mcp.reddit_client_secret
+      - name: reddit.reddit_client_secret
         env: REDDIT_CLIENT_SECRET
-      - name: reddit-mcp.reddit_username
+      - name: reddit.reddit_username
         env: REDDIT_USERNAME
-      - name: reddit-mcp.reddit_password
+      - name: reddit.reddit_password
         env: REDDIT_PASSWORD
-      - name: reddit-mcp.reddit_user_agent
+      - name: reddit.reddit_user_agent
         env: REDDIT_USER_AGENT
 
   # =========================================================================
   # FACEBOOK — Page posting, comments, insights
   # =========================================================================
-  facebook-mcp:
+  facebook:
     title: Facebook Pages
     description: "Post to Facebook Pages, manage comments, and view insights via MCP"
     type: server
     image: facebook-mcp:latest
     source: https://github.com/HagaiHen/facebook-mcp-server
     secrets:
-      - name: facebook-mcp.facebook_access_token
+      - name: facebook.facebook_access_token
         env: FACEBOOK_ACCESS_TOKEN
-      - name: facebook-mcp.facebook_page_id
+      - name: facebook.facebook_page_id
         env: FACEBOOK_PAGE_ID
 
   # =========================================================================

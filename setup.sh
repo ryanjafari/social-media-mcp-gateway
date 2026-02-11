@@ -3,11 +3,11 @@
 # setup.sh — Build social media MCP Docker images and register them
 #             in the Docker MCP Gateway.
 #
-# Only builds/enables servers that have credentials in social-media.env.
+# Only builds/enables servers that have credentials in .env.
 # Re-run after adding new credentials to activate more platforms.
 #
 # Usage:
-#   1. Fill in social-media.env with your platform credentials
+#   1. Fill in .env with your platform credentials
 #   2. Run: bash setup.sh
 #
 # Prerequisites:
@@ -18,7 +18,7 @@ set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 CATALOG_NAME="social-media"
-ENV_FILE="${SCRIPT_DIR}/social-media.env"
+ENV_FILE="${SCRIPT_DIR}/.env"
 
 # =========================================================================
 # Helper functions
@@ -35,7 +35,7 @@ build_image() {
 set_secrets_for_server() {
   # The secret name in the store must exactly match the "name" field in the
   # catalog YAML.  Our catalog uses "servername.lowercase_var" format
-  # (e.g. substack-mcp.substack_publication_url) matching the Docker MCP
+  # (e.g. substack.substack_publication_url) matching the Docker MCP
   # convention (like github.personal_access_token).
   local server_name="$1"
   shift
@@ -69,7 +69,7 @@ has_credentials() {
 
 if [[ ! -f "${ENV_FILE}" ]]; then
   echo "ERROR: ${ENV_FILE} not found."
-  echo "Fill in social-media.env with your credentials first."
+  echo "Copy .env.example to .env and fill in your credentials first."
   exit 1
 fi
 
@@ -129,31 +129,31 @@ else
 fi
 
 if has_credentials "${SUBSTACK_VARS[@]}"; then
-  echo "  ✓ substack-mcp"
-  ENABLED_SERVERS+=(substack-mcp)
+  echo "  ✓ substack"
+  ENABLED_SERVERS+=(substack)
 else
-  echo "  ⊘ substack-mcp (no credentials — skipping)"
+  echo "  ⊘ substack (no credentials — skipping)"
 fi
 
 if has_credentials "${MEDIUM_VARS[@]}"; then
-  echo "  ✓ medium-mcp"
-  ENABLED_SERVERS+=(medium-mcp)
+  echo "  ✓ medium"
+  ENABLED_SERVERS+=(medium)
 else
-  echo "  ⊘ medium-mcp (no credentials — skipping)"
+  echo "  ⊘ medium (no credentials — skipping)"
 fi
 
 if has_credentials "${REDDIT_VARS[@]}"; then
-  echo "  ✓ reddit-mcp"
-  ENABLED_SERVERS+=(reddit-mcp)
+  echo "  ✓ reddit"
+  ENABLED_SERVERS+=(reddit)
 else
-  echo "  ⊘ reddit-mcp (no credentials — skipping)"
+  echo "  ⊘ reddit (no credentials — skipping)"
 fi
 
 if has_credentials "${FACEBOOK_VARS[@]}"; then
-  echo "  ✓ facebook-mcp"
-  ENABLED_SERVERS+=(facebook-mcp)
+  echo "  ✓ facebook"
+  ENABLED_SERVERS+=(facebook)
 else
-  echo "  ⊘ facebook-mcp (no credentials — skipping)"
+  echo "  ⊘ facebook (no credentials — skipping)"
 fi
 
 if has_credentials "${TWITTER_ENH_VARS[@]}"; then
@@ -191,13 +191,13 @@ for srv in "${ENABLED_SERVERS[@]}"; do
   case "${srv}" in
     crosspost)
       build_image "crosspost-mcp:latest" "${SCRIPT_DIR}" ;;
-    substack-mcp)
+    substack)
       build_image "substack-enhanced-mcp:latest" "${SCRIPT_DIR}/substack-enhanced" ;;
-    medium-mcp)
+    medium)
       build_image "medium-mcp:latest" "${SCRIPT_DIR}/medium" ;;
-    reddit-mcp)
+    reddit)
       build_image "reddit-mcp:latest" "${SCRIPT_DIR}/reddit" ;;
-    facebook-mcp)
+    facebook)
       build_image "facebook-mcp:latest" "${SCRIPT_DIR}/facebook" ;;
     twitter-enhanced)
       build_image "twitter-enhanced-mcp:latest" "${SCRIPT_DIR}/twitter-enhanced" ;;
@@ -246,6 +246,14 @@ for var in "${ALL_KNOWN_VARS[@]}"; do
   local_lower=$(echo "${var}" | tr '[:upper:]' '[:lower:]')
   docker mcp secret rm "${local_lower}" 2>/dev/null || true
 done
+# Remove old "-mcp" prefixed secrets from previous naming convention
+OLD_PREFIXED_SERVERS=("substack-mcp" "medium-mcp" "reddit-mcp" "facebook-mcp")
+for old_srv in "${OLD_PREFIXED_SERVERS[@]}"; do
+  for var in "${ALL_KNOWN_VARS[@]}"; do
+    local_lower=$(echo "${var}" | tr '[:upper:]' '[:lower:]')
+    docker mcp secret rm "${old_srv}.${local_lower}" 2>/dev/null || true
+  done
+done
 echo "  ✓ done"
 echo ""
 
@@ -260,14 +268,14 @@ for srv in "${ENABLED_SERVERS[@]}"; do
   case "${srv}" in
     crosspost)
       set_secrets_for_server "crosspost" "${CROSSPOST_VARS[@]}" ;;
-    substack-mcp)
-      set_secrets_for_server "substack-mcp" "${SUBSTACK_VARS[@]}" ;;
-    medium-mcp)
-      set_secrets_for_server "medium-mcp" "${MEDIUM_VARS[@]}" ;;
-    reddit-mcp)
-      set_secrets_for_server "reddit-mcp" "${REDDIT_VARS[@]}" ;;
-    facebook-mcp)
-      set_secrets_for_server "facebook-mcp" "${FACEBOOK_VARS[@]}" ;;
+    substack)
+      set_secrets_for_server "substack" "${SUBSTACK_VARS[@]}" ;;
+    medium)
+      set_secrets_for_server "medium" "${MEDIUM_VARS[@]}" ;;
+    reddit)
+      set_secrets_for_server "reddit" "${REDDIT_VARS[@]}" ;;
+    facebook)
+      set_secrets_for_server "facebook" "${FACEBOOK_VARS[@]}" ;;
     twitter-enhanced)
       set_secrets_for_server "twitter-enhanced" "${TWITTER_ENH_VARS[@]}" ;;
     bluesky-enhanced)
@@ -321,6 +329,6 @@ echo ""
 echo "  To verify tools are available:"
 echo "    docker mcp tools ls"
 echo ""
-echo "  Add more credentials to social-media.env and re-run this script"
+echo "  Add more credentials to .env and re-run this script"
 echo "  to activate additional platforms."
 echo ""

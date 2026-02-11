@@ -1,5 +1,4 @@
 # Credentials — NEVER commit
-social-media.env
 *.env
 !*.env.example
 
